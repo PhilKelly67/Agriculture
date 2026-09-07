@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Seam Stitching Portfolio"
+description = "A responsive school Agriculture and Home Science portfolio documenting open seam and closed seam stitching, practical applications, process steps, team contributions, and project reflection."
+version = "1.0.0"
+id = "artifacts/seam-stitching-portfolio"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21239
+
+[services.development]
+run = "pnpm --filter @workspace/seam-stitching-portfolio run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/seam-stitching-portfolio", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/seam-stitching-portfolio/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21239"
+BASE_PATH = "/"

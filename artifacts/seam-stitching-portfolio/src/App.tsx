@@ -10,6 +10,7 @@ import Lenis from 'lenis';
 import {
   ArrowDownRight,
   ArrowRight,
+  ArrowUpRight,
   Check,
   CircleX,
   Menu,
@@ -84,6 +85,15 @@ function TextileMark() {
   );
 }
 
+function HoverText({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return (
+    <span className={`text-hover ${className}`}>
+      <span className="text-hover-current">{children}</span>
+      <span className="text-hover-next" aria-hidden="true">{children}</span>
+    </span>
+  );
+}
+
 function Topbar({ menuOpen, setMenuOpen }: { menuOpen: boolean; setMenuOpen: (open: boolean) => void }) {
   const navItems = [
     ['The seam', 'comparison'],
@@ -100,10 +110,10 @@ function Topbar({ menuOpen, setMenuOpen }: { menuOpen: boolean; setMenuOpen: (op
         </button>
         <nav className="nav-links" aria-label="Primary navigation">
           {navItems.map(([label, id]) => (
-            <button key={id} onClick={() => scrollToId(id)} data-testid={`button-nav-${id}`}>{label}</button>
+            <button key={id} onClick={() => scrollToId(id)} data-testid={`button-nav-${id}`}><HoverText>{label}</HoverText></button>
           ))}
-          <button className="nav-cta" onClick={() => scrollToId('applications')} data-testid="button-nav-applications">
-            Explore uses <ArrowRight size={14} />
+          <button className="nav-cta" onClick={() => scrollToId('contact')} data-testid="button-nav-contact">
+            <HoverText>Contact Phil</HoverText> <ArrowRight size={14} />
           </button>
         </nav>
         <button className="mobile-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'} aria-expanded={menuOpen} data-testid="button-mobile-menu">
@@ -112,8 +122,8 @@ function Topbar({ menuOpen, setMenuOpen }: { menuOpen: boolean; setMenuOpen: (op
       </div>
       {menuOpen && (
         <nav className="mobile-nav wrap" aria-label="Mobile navigation">
-          {navItems.concat([['Explore uses', 'applications']]).map(([label, id]) => (
-            <button key={id} onClick={() => { scrollToId(id); setMenuOpen(false); }} data-testid={`button-mobile-${id}`}>{label}</button>
+          {navItems.concat([['Contact Phil', 'contact']]).map(([label, id]) => (
+            <button key={id} onClick={() => { scrollToId(id); setMenuOpen(false); }} data-testid={`button-mobile-${id}`}><HoverText>{label}</HoverText></button>
           ))}
         </nav>
       )}
@@ -289,7 +299,33 @@ function Reflection() {
 }
 
 function Footer() {
-  return <footer className="footer"><div className="wrap"><div className="footer-top"><div className="footer-brand"><div className="brand"><span className="brand-mark"><TextileMark /></span><span className="brand-word">STITCH STUDY<span style={{ color: '#a6c3a5' }}>practical journal / 2026</span></span></div><p>A student-made record of fabric joinery, shared from the Agriculture &amp; Home Science practical.</p></div><div className="footer-meta"><div><b>School</b><span>Golden Elites</span></div><div><b>Subject</b><span>Agriculture &amp; Home Science</span></div><div><b>Grade level</b><span>Senior practical studies</span></div><div><b>Year</b><span>2026</span></div></div></div><div className="footer-bottom"><span>© 2026 Stitch Study. All practical work by the group.</span><span>Website created by Phil Kelly</span></div></div></footer>;
+  return (
+    <footer className="footer" id="contact">
+      <div className="wrap">
+        <div className="footer-top">
+          <div className="footer-brand">
+            <div className="brand"><span className="brand-mark"><TextileMark /></span><span className="brand-word">STITCH STUDY<span style={{ color: '#a6c3a5' }}>practical journal / 2026</span></span></div>
+            <p>A student-made record of fabric joinery, shared from the Agriculture &amp; Home Science practical.</p>
+          </div>
+          <div className="footer-contact">
+            <span className="eyebrow">Open line / 01</span>
+            <h3>Have a question about the practical?</h3>
+            <a className="contact-link" href="https://github.com/PhilKelly67" target="_blank" rel="noreferrer" data-testid="link-contact-phil">
+              <HoverText>Connect with Phil Kelly</HoverText><ArrowUpRight size={17} />
+            </a>
+            <span className="contact-note">Questions, feedback or a closer look at the project.</span>
+          </div>
+          <div className="footer-meta">
+            <div><b>School</b><span>Golden Elites</span></div>
+            <div><b>Subject</b><span>Agriculture &amp; Home Science</span></div>
+            <div><b>Grade level</b><span>Senior practical studies</span></div>
+            <div><b>Year</b><span>2026</span></div>
+          </div>
+        </div>
+        <div className="footer-bottom"><span>© 2026 Stitch Study. All practical work by the group.</span><span>Website created by Phil Kelly</span></div>
+      </div>
+    </footer>
+  );
 }
 
 function LoadingScreen({ onComplete }: { onComplete: () => void }) {
@@ -439,7 +475,34 @@ function Home() {
         };
       });
 
-      return () => cleanupButtonListeners.forEach((cleanup) => cleanup());
+      const hoverTextElements = gsap.utils.toArray<HTMLElement>('.text-hover');
+      const cleanupTextListeners = hoverTextElements.map((element) => {
+        const current = element.querySelector<HTMLElement>('.text-hover-current');
+        const next = element.querySelector<HTMLElement>('.text-hover-next');
+        if (!current || !next) return () => {};
+
+        gsap.set(next, { yPercent: 100 });
+        const onEnter = () => {
+          gsap.to(current, { yPercent: -100, duration: 0.34, ease: 'power3.out', overwrite: true });
+          gsap.to(next, { yPercent: 0, duration: 0.34, ease: 'power3.out', overwrite: true });
+        };
+        const onLeave = () => {
+          gsap.to(current, { yPercent: 0, duration: 0.34, ease: 'power3.out', overwrite: true });
+          gsap.to(next, { yPercent: 100, duration: 0.34, ease: 'power3.out', overwrite: true });
+        };
+
+        element.addEventListener('mouseenter', onEnter);
+        element.addEventListener('mouseleave', onLeave);
+        return () => {
+          element.removeEventListener('mouseenter', onEnter);
+          element.removeEventListener('mouseleave', onLeave);
+        };
+      });
+
+      return () => {
+        cleanupButtonListeners.forEach((cleanup) => cleanup());
+        cleanupTextListeners.forEach((cleanup) => cleanup());
+      };
     });
 
     return () => {

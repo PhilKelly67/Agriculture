@@ -294,7 +294,9 @@ function Footer() {
 
 function LoadingScreen({ onComplete }: { onComplete: () => void }) {
   useEffect(() => {
-    const timeout = window.setTimeout(onComplete, 1800);
+    // The opening card is intentionally part of the journal's pacing.
+    // Keep it on screen for a full five seconds before handing over to the study.
+    const timeout = window.setTimeout(onComplete, 5000);
     return () => window.clearTimeout(timeout);
   }, [onComplete]);
 
@@ -334,6 +336,16 @@ function Home() {
   const [preview, setPreview] = useState<{ mode: ProcessMode; index: number } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) {
+      document.querySelectorAll<HTMLElement>('.reveal').forEach((element) => element.classList.add('is-visible'));
+      document.querySelectorAll<HTMLElement>('.hero-copy, .hero-art').forEach((element) => {
+        element.style.opacity = '1';
+        element.style.visibility = 'visible';
+      });
+      return;
+    }
+
     gsap.registerPlugin(ScrollTrigger);
 
     const lenis = new Lenis({

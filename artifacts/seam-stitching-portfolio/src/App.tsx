@@ -289,7 +289,24 @@ function Reflection() {
 }
 
 function Footer() {
-  return <footer className="footer"><div className="wrap"><div className="footer-top"><div className="footer-brand"><div className="brand"><span className="brand-mark"><TextileMark /></span><span className="brand-word">STITCH STUDY<span style={{ color: '#a6c3a5' }}>practical journal / 2026</span></span></div><p>A student-made record of fabric joinery, shared from the Agriculture &amp; Home Science practical.</p></div><div className="footer-meta"><div><b>School</b><span>Kijani Hills School</span></div><div><b>Subject</b><span>Agriculture &amp; Home Science</span></div><div><b>Grade level</b><span>Senior practical studies</span></div><div><b>Year</b><span>2026</span></div></div></div><div className="footer-bottom"><span>© 2026 Stitch Study. All practical work by the group.</span><span>Website created by Phil Kelly</span></div></div></footer>;
+  return <footer className="footer"><div className="wrap"><div className="footer-top"><div className="footer-brand"><div className="brand"><span className="brand-mark"><TextileMark /></span><span className="brand-word">STITCH STUDY<span style={{ color: '#a6c3a5' }}>practical journal / 2026</span></span></div><p>A student-made record of fabric joinery, shared from the Agriculture &amp; Home Science practical.</p></div><div className="footer-meta"><div><b>School</b><span>Golden Elites</span></div><div><b>Subject</b><span>Agriculture &amp; Home Science</span></div><div><b>Grade level</b><span>Senior practical studies</span></div><div><b>Year</b><span>2026</span></div></div></div><div className="footer-bottom"><span>© 2026 Stitch Study. All practical work by the group.</span><span>Website created by Phil Kelly</span></div></div></footer>;
+}
+
+function LoadingScreen({ onComplete }: { onComplete: () => void }) {
+  useEffect(() => {
+    const timeout = window.setTimeout(onComplete, 1800);
+    return () => window.clearTimeout(timeout);
+  }, [onComplete]);
+
+  return (
+    <div className="loading-screen" role="status" aria-label="Loading Golden Elites stitching portfolio" data-testid="loading-screen">
+      <div className="loading-content">
+        <span className="loading-kicker">Golden Elites / Stitch Study</span>
+        <span className="loading-greeting">Hello</span>
+        <span className="loading-rule" aria-hidden="true" />
+      </div>
+    </div>
+  );
 }
 
 function Lightbox({ mode, index, onClose }: { mode: ProcessMode; index: number; onClose: () => void }) {
@@ -315,6 +332,7 @@ function Lightbox({ mode, index, onClose }: { mode: ProcessMode; index: number; 
 function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [preview, setPreview] = useState<{ mode: ProcessMode; index: number } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
 
@@ -422,6 +440,7 @@ function Home() {
   }, []);
   return (
     <div className="site-shell">
+      {isLoading && <LoadingScreen onComplete={() => setIsLoading(false)} />}
       <Topbar menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
       <main><Hero /><Marquee /><Comparison /><Workflow onPreview={(mode, index) => setPreview({ mode, index })} /><Applications /><Team /><Reflection /></main>
       <Footer />
